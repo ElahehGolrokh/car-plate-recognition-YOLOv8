@@ -1,6 +1,7 @@
 __pycache__/
 data/
 venv/
+freshvenv/
 runs
 yolov8n.pt
 best.pt
