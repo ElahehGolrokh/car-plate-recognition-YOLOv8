@@ -1,4 +1,16 @@
 import argparse
+import sys
+import types
+
+try:
+    # If bidi.algorithm already exists, do nothing
+    import bidi.algorithm as _ba  # noqa: F401
+except Exception:
+    # Create a minimal module that re-exports bidi.get_display
+    from bidi import get_display  # will raise if not installed
+    mod = types.ModuleType("bidi.algorithm")
+    mod.get_display = get_display
+    sys.modules["bidi.algorithm"] = mod
 import easyocr
 
 from src.prediction import ImagePredictor, VideoPredictor
