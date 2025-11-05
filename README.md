@@ -1,109 +1,177 @@
-# Car Plate Detection using YOLOv8 🚀
+# Car Plate Recognition using YOLOv8 🚗💡
 ![predictions](predictions.jpg)
-Welcome to the car plate detection project using YOLOv8! This repository provides a step-by-step guide to preparing data, training an object detection model with YOLOv8, and running inference with the trained model.
+
+Welcome to the **Car Plate Recognition** project using **YOLOv8**!  
+This repository provides a complete pipeline — from dataset preparation and model training to inference and plate text reading — for automatic car plate recognition.
+
 ![video_predictions](output02.avi)
 
-## Overview
+---
 
-The basic usage is based on the YOLOv8 tutorial, customized for the current dataset to guide you through preparing data and training a model. This tutorial will cover everything from installation to training the YOLOv8 object detection model with a custom dataset and then exporting it for inference. <br>
+## 🚀 Overview
 
-You can find the dataset used in this project <a href="https://www.kaggle.com/datasets/andrewmvd/car-plate-detection">here</a>. <br>
+This project extends the basic YOLOv8 object detection workflow to detect and read car plates.  
+You’ll learn how to prepare a custom dataset, train a YOLOv8 model, and use OCR (EasyOCR) to read license plates from images and videos.
 
-Also <a href="https://www.kaggle.com/code/elahehgolrokh/training-object-detection-model-using-yolo8">here</a> is the kaggle notebook of this project.
+📦 **Dataset:**  
+You can find the dataset used in this project on Kaggle:  
+👉 [Car Plate Detection Dataset](https://www.kaggle.com/datasets/andrewmvd/car-plate-detection)
 
-## Installation
+💻 **Kaggle Notebook:**  
+A full tutorial notebook is also available here:  
+👉 [Training Object Detection Model using YOLOv8](https://www.kaggle.com/code/elahehgolrokh/training-object-detection-model-using-yolo8)
 
-This package is tested on Ubuntu 20.04 with Python 3.9.12. First, create your virtual environment:
+---
 
-```shell
+## 🧩 Development Steps
+
+1. **Train a baseline plate detection model** using YOLOv8 on the Kaggle dataset.  
+2. **Add the plate reading phase** using EasyOCR to recognize plate numbers.  
+3. **Improve the detection model** through fine-tuning on [this Kaggle dataset](https://www.kaggle.com/datasets/fareselmenshawii/large-license-plate-dataset).  
+4. **To Do:** Enhance prediction **consistency across video frames** for smoother tracking.
+
+---
+
+## ⚙️ Installation
+
+Tested on **Ubuntu 20.04** with **Python 3.9.12**.
+
+### 1️⃣ Create a virtual environment
+```
 python -m venv venv
 source venv/bin/activate
 ```
-Next, install all dependencies:
 
-```shell
+### 2️⃣ Install dependencies
+```
 pip install -r requirements.txt
 ```
 
-## Data Preparation
-To use YOLOv8 for your object detection task, structure your data as follows:
+---
 
-1. In the root directory of your dataset, create two folders named images and labels. For this tutorial, we consider data/ in the root of our project as the dataset root.
-2. Images can be in jpg or png formats.
-3. Create a config file in yaml format specifying the paths to the root and images directories.
-4. Separating train, validation, and test partitions is optional. If you do this, create subdirectories within both images and labels folders. Specify these paths in the config file.
-5. Labels must be in txt format. For each bounding box in an image, include a row in the corresponding label file with the following structure (no commas): class_label bbx_x_center bbx_y_center bbx_width bbx_height.
+## 🗂️ Data Preparation
 
-The data directory should be structured like this:
+To use YOLOv8 for car plate detection, organize your dataset as follows:
+
+1. In your dataset root directory (e.g., `data/`), create two folders: `images/` and `labels/`.  
+2. Images can be in `.jpg` or `.png` format.  
+3. Create a YAML configuration file specifying dataset paths.  
+4. Optionally split your dataset into `train`, `validation`, and `test` subsets inside both `images` and `labels` folders.  
+5. Label files must be in `.txt` format, with each line containing:  
+   ```
+   class_id x_center y_center width height
+   ```
+
+### Example directory structure
 
 ```
 data
 ├── images
-│   ├── test
-│   │   ├── Cars27.png
-│   │   ├── ...
 │   ├── train
-│   │   ├── Cars0.png
-│   │   ├── ...
-│   └── validation
-│       ├── Cars10.png
-│       ├── ...
+│   ├── validation
+│   └── test
 └── labels
-    ├── test
-    │   ├── Cars27.txt
-    │   ├── ...
     ├── train
-    │   ├── Cars0.txt
-    │   ├── ...
-    └── validation
-        ├── Cars10.txt
-        ├── ...
+    ├── validation
+    └── test
 ```
 
-## Train YOLOv8 Object Detection Model on a Custom Dataset
-To train your own object detection model, you can run:
+### Original dataset format (before conversion)
+If your dataset starts in this format:
+```
+.
+├── annotations
+│   ├── Cars0.xml
+│   ├── Cars100.xml
+│   ├── ...
+└── images
+    ├── Cars0.png
+    ├── Cars100.png
+    ├── ...
+```
+The data preparation phase in this repository automatically converts it to YOLO format.
 
-```shell
+---
+
+## 🏋️‍♂️ Training the YOLOv8 Model
+
+To train the car plate detection model, simply run:
+
+```
 python main.py
 ```
 
-You can customize the following arguments for running the main script:
+You can customize the following arguments:
 
-* -rpr or --remove_prev_runs: Whether you want to remove previous runs.
-* -p or --prepare: Whether you want to implement data preparation.
-* -t or --train: Whether you want to implement training.
-* -e or --export: Whether you want to export a saved model.
+| Flag | Description |
+|------|--------------|
+| `-rpr`, `--remove_prev_runs` | Remove previous YOLO run directories before training |
+| `-p`, `--prepare` | Run data preparation before training |
+| `-t`, `--train` | Enable model training |
+| `-e`, `--export` | Export the trained YOLOv8 model |
 
-## Inference with Trained Models
-To get predictions from a YOLO saved model, run:
+---
 
-```shell
+## 🧠 Inference with Trained Models
+
+To perform inference on images using a trained YOLOv8 model:
+
+```
 python inference.py --model_path 'path/to/model' --image_path 'path/to/test_image' --output_name 'output.png'
 ```
-You can customize the following arguments for running the inference script:
 
-* -mp or --model_path: path to saved YOLOv8 model
-* -ip or --image_path: path to jpg or png test image, or it could be path to directory containing several test images
-* -vp or --video_path: path to mp4 test video
-* -on or --output_name: name of plt saved figure or video of the final prediction. Just will be used in case of inferencing for a single test image or video
-* -rf or --read_flag: specifies whether to read car plates using OCR
-<br>
-The default path for the saved model is `runs/detect/train/weights/best.pt`. The test image can be in `jpg` or `png` format. The result of the model's predicted bounding boxes will be saved in the `runs` directory as a `png` file or your predefined format for video files (avi or mp4). <br>
+You can customize the following arguments:
 
-Note: You might need to change datasets_dir, weights_dir, or runs_dir in .config/Ultralytics/settings.yaml based on the root of your project. <br>
+| Flag | Description |
+|------|--------------|
+| `-mp`, `--model_path` | Path to the trained YOLOv8 model |
+| `-ip`, `--image_path` | Path to an image or directory of images |
+| `-vp`, `--video_path` | Path to a test video file |
+| `-on`, `--output_name` | Name for the saved output (image or video) |
+| `-rf`, `--read_flag` | Enable OCR-based plate reading |
 
-Also for getting predictions from a YOLO saved model on test videos you can run:
+📍 **Default model path:**  
+`runs/detect/train/weights/best.pt`  
 
-```shell
+🖼️ **Output:**  
+Prediction results (images or videos) are saved in the `runs/` directory.
+
+> **Note:**  
+> You may need to adjust `datasets_dir`, `weights_dir`, or `runs_dir` in `.config/Ultralytics/settings.yaml` depending on your project’s root directory.
+
+### Run inference on videos
+```
 python inference.py --model_path 'path/to/model' --video_path 'path/to/test_video' --output_name 'output.avi'
 ```
 
-## Plate Reading
+---
+
+## 🔍 Plate Reading (OCR)
 
 ![plate_reading](plate_reading.jpg)
 
-To read the car plates, pass the `-rf` flag (or `--read_flag`) to the command:
+To recognize plate numbers from detections, use the OCR option:
 
-```shell
+```
 python inference.py --model_path 'path/to/model' --image_path 'path/to/test_image' -rf
 ```
+
+This enables the **EasyOCR** module to extract plate text from the detected bounding boxes.
+
+---
+
+## 🧾 License
+This project is open-source and distributed under the MIT License.  
+Feel free to use, modify, and share it for research or personal projects.
+
+---
+
+## 🙌 Acknowledgements
+- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics)
+- [EasyOCR](https://github.com/JaidedAI/EasyOCR)
+- [Kaggle Dataset: Car Plate Detection](https://www.kaggle.com/datasets/andrewmvd/car-plate-detection)
+
+---
+
+**Author:** Elaheh Golrokh  
+📧 For questions or collaboration: [GitHub Profile](https://github.com/elahehgolrokh)
