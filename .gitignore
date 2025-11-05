@@ -3,3 +3,6 @@ data/
 venv/
 runs
 yolov8n.pt
+best.pt
+best (3).pt
+doc.odt
