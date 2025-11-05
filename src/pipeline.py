@@ -1,3 +1,4 @@
+import os
 import shutil
 import subprocess
 
@@ -48,7 +49,10 @@ class Pipeline:
         """Runs the entire pipeline based on user prefrences"""
         Config = OmegaConf.load(self.config_path)
         if self.remove_prev_runs:
-            shutil.rmtree('runs', )
+            if os.path.isdir('runs'):
+                shutil.rmtree('runs', )
+            else:
+                print('There is no runs directory.')
         if self.prepare:
             images_dir = Config.images_dir
             labels_dir = Config.labels_dir
@@ -59,6 +63,7 @@ class Pipeline:
             image_size = Config.image_size
             epochs = Config.epochs
             try:
+                print('Training ...')
                 bashCommand = f"yolo train model=yolov8n.pt data={self.config_path} epochs={epochs} imgsz={image_size}"
                 process = subprocess.Popen(bashCommand.split(),
                                            stdout=subprocess.PIPE)
