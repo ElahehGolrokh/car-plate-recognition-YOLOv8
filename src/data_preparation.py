@@ -90,7 +90,7 @@ class PrepareData:
                         f.write('{}'.format(bbx[3]))
                         f.write('\n')
                     f.close()
-            print('Done!')
+            print('Done with modifying xmls!')
         else:
             print('The labels are already in plain texts as .xml files.')
 
