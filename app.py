@@ -40,13 +40,13 @@ def read_plate(input_type, input_file):
         else:
             raise NotImplementedError("Right now just image files are implemented.")
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        return f"❌ Error: {str(e)}", None
     return output_number, output_file
 
 
 input_type = gr.Radio(["Image", "Video"],
-                              label="Input Type",
-                              info="Select the type of input")
+                      label="Input Type",
+                      info="Select the type of input")
 input_file = gr.File(
     file_types=[".jpg", ".jpeg", ".png", ".mp4", ".avi", ".mov"], 
     label="Upload image or video"
