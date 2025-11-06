@@ -49,9 +49,12 @@ class ImagePredictor(PrecictorBase):
         Reads images and Write the prediction results on each one
         """
         if os.path.isdir(self.input):
+            # The gradio app only is implemented for single image or video
+            # So we dont need the label here
+            label = None
             for file in os.listdir(self.input):
                 file_path = os.path.join(self.input, file)
-                self._get_yolo_predictions(file_path, file)
+                _, fig = self._get_yolo_predictions(file_path, file)
         else:
             label, fig = self._get_yolo_predictions(self.input, self.output_name)
         return label, fig
