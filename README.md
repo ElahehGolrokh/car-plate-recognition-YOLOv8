@@ -128,7 +128,6 @@ You can customize the following arguments:
 | `-ip`, `--image_path` | Path to an image or directory of images |
 | `-vp`, `--video_path` | Path to a test video file |
 | `-on`, `--output_name` | Name for the saved output (image or video) |
-| `-rf`, `--read_flag` | Enable OCR-based plate reading |
 
 📍 **Default model path:**  
 `runs/detect/train/weights/best.pt`  
