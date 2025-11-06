@@ -1,5 +1,6 @@
 __pycache__/
 .python-version
+.gradio/
 data/
 venv/
 runs

@@ -1,8 +1,11 @@
 import cv2
 import easyocr
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import os
+
+from typing import List
 from ultralytics import YOLO
 
 from .base import PrecictorBase
@@ -36,13 +39,12 @@ class ImagePredictor(PrecictorBase):
                  input: str,
                  model_path: str,
                  output_name: str,
-                 reader: easyocr.Reader = None) -> None:
-        self.input = input
-        self.model = YOLO(model_path)
-        self.output_name = output_name
-        self.reader = reader
+                 reader: easyocr.Reader = None,
+                 save_output: bool = True) -> None:
+        super().__init__(input, model_path, output_name, reader, save_output)
 
-    def run(self) -> None:
+
+    def run(self) -> list[str, Figure]:
         """
         Reads images and Write the prediction results on each one
         """
@@ -51,9 +53,10 @@ class ImagePredictor(PrecictorBase):
                 file_path = os.path.join(self.input, file)
                 self._get_yolo_predictions(file_path, file)
         else:
-            self._get_yolo_predictions(self.input, self.output_name)
+            label, fig = self._get_yolo_predictions(self.input, self.output_name)
+        return label, fig
 
-    def _get_yolo_predictions(self, file_path: str, file: str) -> None:
+    def _get_yolo_predictions(self, file_path: str, file: str) -> list[str, Figure]:
         """
         Gets YOLOv8 predictions for an image.
 
@@ -63,12 +66,13 @@ class ImagePredictor(PrecictorBase):
         # Get predictions
         results = self.model.predict(file_path)
         # Visualize the predictions
-        self._visualize_predictions(results, file_path, file)
+        label, fig = self._visualize_predictions(results, file_path, file)
+        return label, fig
 
     def _visualize_predictions(self,
                                results: list,
                                file_path: str,
-                               file: str):
+                               file: str) -> list[str, Figure]:
         """
         Visualizes YOLO predictions on an image.
 
@@ -76,10 +80,10 @@ class ImagePredictor(PrecictorBase):
         :param file_path: path to test image or directory of images
         :param file: input file name. it will be used to save the output
         """
-        output_path = os.path.join('runs', file)
         image = cv2.imread(file_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        _, ax = plt.subplots(1)
+        label = None
+        fig, ax = plt.subplots(1)
         ax.imshow(image)
 
         # Add bounding boxes
@@ -124,7 +128,10 @@ class ImagePredictor(PrecictorBase):
                              color='black',
                              fontsize=12,
                              bbox=dict(facecolor='white', alpha=0.7))
-        plt.savefig(output_path)
+        if self.save_output:
+            output_path = os.path.join('runs', file)
+            plt.savefig(output_path)
+        return label, fig
 
 
 class VideoPredictor(PrecictorBase):
@@ -156,12 +163,10 @@ class VideoPredictor(PrecictorBase):
                  input: str,
                  model_path: str,
                  output_name: str,
-                 reader: easyocr.Reader = None) -> None:
-        self.input = input
-        self.model = YOLO(model_path)
-        self.output_name = output_name
+                 reader: easyocr.Reader = None,
+                 save_output: bool = True) -> None:
+        super().__init__(input, model_path, output_name, reader, save_output)
         self.frame = None
-        self.reader = reader
 
     def run(self) -> None:
         """
