@@ -36,18 +36,11 @@ parser.add_argument('-on',
                     '--output_name',
                     default=None,
                     help='name of the output saved figure or video')
-parser.add_argument('-rf',
-                    '--read_flag',
-                    action='store_true',  # Default value is False
-                    help='specifies whether to read car plates using OCR')
 args = parser.parse_args()
 
 
-def main(image_path, video_path, model_path, output_name, read_flag):
-    if read_flag:
-        reader = easyocr.Reader(['en'])
-    else:
-        reader = None
+def main(image_path, video_path, model_path, output_name):
+    reader = easyocr.Reader(['en'])
     if image_path:
         if not output_name:
             output_name = 'output.png'
@@ -70,5 +63,4 @@ if __name__ == '__main__':
     main(args.image_path,
          args.video_path,
          args.model_path,
-         args.output_name,
-         args.read_flag)
+         args.output_name)

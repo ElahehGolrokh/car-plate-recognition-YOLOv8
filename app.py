@@ -22,23 +22,25 @@ Model_Path = "runs/detect/train/weights/best.pt"
 def read_plate(input_type, input_file):
     input_name = input_file.name
     reader = easyocr.Reader(['en'])
-    print(f'input_type = {input_type}')
-    if input_type == "Image":
-        predictor = ImagePredictor(input=input_name,
-                                   model_path=Model_Path,
-                                   reader=reader,
-                                   output_name=None,
-                                   save_output=False)
+    try:
+        if input_type == "Image":
+            predictor = ImagePredictor(input=input_name,
+                                    model_path=Model_Path,
+                                    reader=reader,
+                                    output_name=None,
+                                    save_output=False)
 
-        # else:
-        #     predictor = VideoPredictor(input=input_name,
-        #                                model_path=Model_Path,
-        #                                reader=reader,
-        #                                output_name=None,
-        #                                save_output=False)
-        output_number, output_file = predictor.run()
-    else:
-        raise NotImplementedError("Right now just image files are implemented.")
+            # else:
+            #     predictor = VideoPredictor(input=input_name,
+            #                                model_path=Model_Path,
+            #                                reader=reader,
+            #                                output_name=None,
+            #                                save_output=False)
+            output_number, output_file = predictor.run()
+        else:
+            raise NotImplementedError("Right now just image files are implemented.")
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
     return output_number, output_file
 
 

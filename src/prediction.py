@@ -43,7 +43,6 @@ class ImagePredictor(PrecictorBase):
                  save_output: bool = True) -> None:
         super().__init__(input, model_path, output_name, reader, save_output)
 
-
     def run(self) -> list[str, Figure]:
         """
         Reads images and Write the prediction results on each one
@@ -83,15 +82,16 @@ class ImagePredictor(PrecictorBase):
         :param file_path: path to test image or directory of images
         :param file: input file name. it will be used to save the output
         """
+        plate_detected = False
         image = cv2.imread(file_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        label = None
         fig, ax = plt.subplots(1)
         ax.imshow(image)
 
         # Add bounding boxes
         for result in results:
             for bbx in result.boxes:
+                plate_detected = True
                 x_min, y_min, x_max, y_max = map(int, bbx.xyxy[0])
                 bounding_box = [x_min, y_min, x_max, y_max]
                 label = self.model.names[int(bbx.cls)]
@@ -118,22 +118,23 @@ class ImagePredictor(PrecictorBase):
                          bbox=dict(facecolor='white', alpha=0.5))
 
                 # Add OCR Result
-                if self.reader:
-                    ocr_result = self._read_plate(image, *bounding_box)
-                    if ocr_result:
-                        # label = f"Plate Number: {ocr_result[0][1]}, Confidence: {ocr_result[0][2]:.2f}"
-                        label = f"Plate Number: {ocr_result[0][1]}"
-                    else:
-                        label = 'Unable to read'
-                    plt.text(x_min - width/2,
-                             y_max + height/2,
-                             label,
-                             color='black',
-                             fontsize=12,
-                             bbox=dict(facecolor='white', alpha=0.7))
+                ocr_result = self._read_plate(image, *bounding_box)
+                if ocr_result:
+                    # label = f"Plate Number: {ocr_result[0][1]}, Confidence: {ocr_result[0][2]:.2f}"
+                    label = f"Plate Number: {ocr_result[0][1]}"
+                else:
+                    label = 'Unable to read'
+                plt.text(x_min - width/2,
+                         y_max + height/2,
+                         label,
+                         color='black',
+                         fontsize=12,
+                         bbox=dict(facecolor='white', alpha=0.7))
         if self.save_output:
             output_path = os.path.join('runs', file)
             plt.savefig(output_path)
+        if not plate_detected:
+            label = 'No Plate Detected'
         return label, fig
 
 
