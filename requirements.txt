@@ -1,6 +1,7 @@
-beautifulsoup4==4.12.3
+beautifulsoup4==4.14.2
 easyocr==1.7.1
 gradio
+lxml==6.0.2
 matplotlib==3.9.0
 numpy==1.26.4
 omegaconf==2.3.0
