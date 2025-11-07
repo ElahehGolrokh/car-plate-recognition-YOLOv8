@@ -1,5 +1,7 @@
+import json
 import gradio as gr
 import os
+import shutil
 import sys
 import tempfile
 import types
@@ -31,6 +33,32 @@ def save_temp(input_name, output_file):
     with open(temp_video_path, "wb") as f:
         f.write(output_file)
     return temp_video_path
+
+
+def flag_plates(plates_text):
+    """Save flagged plates to a file."""
+    if not plates_text:
+        return "⚠️ No plates to save."
+    try:
+        plates = json.loads(plates_text)
+    except Exception:
+        plates = [plates_text]
+
+    os.makedirs("flag", exist_ok=True)
+    save_path = os.path.join("flag", "plates_log.txt")
+    with open(save_path, "a") as f:
+        f.write("\n".join(plates) + "\n")
+    return f"✅ Saved {len(plates)} plate(s) to {save_path}"
+
+
+def download_output_file(file_path):
+    """Prepare file for download by copying to a temp dir."""
+    if not file_path:
+        return None
+    temp_dir = tempfile.mkdtemp()
+    download_path = os.path.join(temp_dir, os.path.basename(file_path))
+    shutil.copy(file_path, download_path)
+    return download_path
 
 
 def process_image(input_file):
@@ -77,6 +105,7 @@ with gr.Blocks() as demo:
     labels_output = gr.Text(label="Predicted Labels", visible=True)
     image_output = gr.Plot(label="Predicted Image", visible=True)
     video_output = gr.Video(label="Predicted Video", visible=False)
+    hidden_path = gr.Textbox(visible=False)
 
     def toggle_output(selected_type):
         return (
@@ -89,6 +118,17 @@ with gr.Blocks() as demo:
     with gr.Row():
         run_btn = gr.Button("Run Prediction", variant="primary")
         clear_btn = gr.Button("🧹 Clear", variant="secondary")
+    
+    with gr.Row():
+        download_btn = gr.Button("📥 Download Output", variant="secondary")
+        flag_btn = gr.Button("🚩 Save Detected Plates", variant="secondary")
+        status_box = gr.Textbox(label="Status", interactive=False)
+
+    # Connect flag button
+    flag_btn.click(fn=flag_plates, inputs=labels_output, outputs=status_box)
+
+    # Connect download button
+    download_btn.click(fn=download_output_file, inputs=hidden_path, outputs=gr.File())
 
     def handle_run(selected_type, file_obj):
         if selected_type == "Image":
