@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import os
 
-from typing import List
+import tempfile
 from ultralytics import YOLO
 
 from .base import PrecictorBase
@@ -56,7 +56,8 @@ class ImagePredictor(PrecictorBase):
                 _, fig = self._get_yolo_predictions(file_path, file)
         else:
             label, fig = self._get_yolo_predictions(self.input, self.output_name)
-        return label, fig
+        # return label, fig
+        return fig
 
     def _get_yolo_predictions(self, file_path: str, file: str) -> list[str, Figure]:
         """
@@ -140,8 +141,9 @@ class ImagePredictor(PrecictorBase):
 
 class VideoPredictor(PrecictorBase):
     """
-    Gets predictions and visualization of a yolo saved model on test video
-    ...
+    Runs YOLOv8 inference on a video and either saves or returns
+    the annotated video (for use in Gradio, etc.).
+
     Attributes
     ----------
         input: path to input test video
@@ -158,105 +160,78 @@ class VideoPredictor(PrecictorBase):
         _visualize_predictions()
         _crop_plate()
         _read_plate()
-
-    Public Methods
-    --------------
-        run()
     """
+
     def __init__(self,
                  input: str,
                  model_path: str,
-                 output_name: str,
+                 output_name: str = "output.avi",
                  reader: easyocr.Reader = None,
-                 save_output: bool = True) -> None:
+                 save_output: bool = True):
         super().__init__(input, model_path, output_name, reader, save_output)
+        self.model = YOLO(model_path)
         self.frame = None
 
-    def run(self) -> None:
-        """
-        Reads video file and Write the prediction results on each frame
-        """
-        # Open the video file
+    def run(self):
+        """Run YOLOv8 detection and optionally return the output video as bytes."""
         cap = cv2.VideoCapture(self.input)
-        # Get video properties
+        if not cap.isOpened():
+            raise ValueError(f"Cannot open video: {self.input}")
+
         frame_width = int(cap.get(3))
         frame_height = int(cap.get(4))
         fps = cap.get(cv2.CAP_PROP_FPS)
-        output_path = os.path.join('runs', self.output_name)
-        # Define the codec and create VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter(output_path,
-                              fourcc,
-                              fps,
-                              (frame_width, frame_height))
+
+        if self.save_output:
+            os.makedirs("runs", exist_ok=True)
+            output_path = os.path.join("runs", self.output_name)
+            fourcc = cv2.VideoWriter_fourcc(*"XVID")
+            out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
+        else:
+            # Use a temporary file for in-memory result
+            tmpfile = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False)
+            out = cv2.VideoWriter(tmpfile.name,
+                                  cv2.VideoWriter_fourcc(*'VP90'),
+                                  fps, (frame_width, frame_height))
+
         while cap.isOpened():
             ret, self.frame = cap.read()
             if not ret:
                 break
             self._get_yolo_predictions()
-            # Press 'q' to exit the loop
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-            # Write the frame with predictions
-            # pdb.set_trace()
             out.write(self.frame)
-
-            # Display the frame with predictions
-            cv2.imshow('YOLOv8 Predictions', self.frame)
 
         cap.release()
         out.release()
-        cv2.destroyAllWindows()
+
+        if self.save_output:
+            return output_path  # local file path
+        else:
+            with open(tmpfile.name, "rb") as f:
+                video_bytes = f.read()
+            os.remove(tmpfile.name)
+            return video_bytes
 
     def _get_yolo_predictions(self):
-        """
-        Gets YOLOv8 predictions for a frame of the input video
-        """
-        # Perform inference on the frame
+        """Perform YOLOv8 inference on current frame."""
         results = self.model(self.frame)
-        # Extract predictions and draw bounding boxes
         for result in results:
             for box in result.boxes:
                 self._visualize_predictions(box)
 
-    def _visualize_predictions(self,
-                               box):
-        """
-        Visualizes YOLO predictions on a frame of the input video
-
-        :param box: the specific predicted bounding box in the image
-        """
-        # Add bounding boxes
+    def _visualize_predictions(self, box):
+        """Draw bounding boxes and OCR results."""
         x_min, y_min, x_max, y_max = map(int, box.xyxy[0])
         label = self.model.names[int(box.cls)]
-        confidence = box.conf.item()
-        color = (0, 255, 0)  # Green color for bounding boxes
+        conf = box.conf.item()
+        color = (0, 255, 0)
 
-        # Draw bounding box
         cv2.rectangle(self.frame, (x_min, y_min), (x_max, y_max), color, 2)
-        # Draw label and confidence
-        cv2.putText(self.frame,
-                    f'{label} {confidence:.2f}',
-                    (x_min, y_min - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.9,
-                    color,
-                    2)
+        cv2.putText(self.frame, f"{label} {conf:.2f}", (x_min, y_min - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
 
-        # Add OCR Result
         if self.reader:
-            height = y_max - y_min
-            bounding_box = [x_min, y_min, x_max, y_max]
-            ocr_result = self._read_plate(self.frame, *bounding_box)
-            if ocr_result:
-                # label = f"{ocr_result[0][1]}, {ocr_result[0][2]:.2f}"  # reporting with confidence (ocr_result[0][2])
-                label = f"{ocr_result[0][1]}"
-            else:
-                label = 'Unable to read'
-            cv2.putText(self.frame,
-                        label,
-                        (x_min, y_max + height),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.9,
-                        (0, 255, 0),
-                        2)
+            ocr_result = self._read_plate(self.frame, x_min, y_min, x_max, y_max)
+            ocr_label = ocr_result[0][1] if ocr_result else "Unable to read"
+            cv2.putText(self.frame, ocr_label, (x_min, y_max + 25),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
