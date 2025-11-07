@@ -43,23 +43,20 @@ class ImagePredictor(PrecictorBase):
                  save_output: bool = True) -> None:
         super().__init__(input, model_path, output_name, reader, save_output)
 
-    def run(self) -> list[str, Figure]:
+    def run(self) -> Figure:
         """
         Reads images and Write the prediction results on each one
         """
         if os.path.isdir(self.input):
-            # The gradio app only is implemented for single image or video
-            # So we dont need the label here
-            label = None
             for file in os.listdir(self.input):
                 file_path = os.path.join(self.input, file)
-                _, fig = self._get_yolo_predictions(file_path, file)
+                fig = self._get_yolo_predictions(file_path, file)
         else:
-            label, fig = self._get_yolo_predictions(self.input, self.output_name)
-        # return label, fig
+            fig = self._get_yolo_predictions(self.input, self.output_name)
+
         return fig
 
-    def _get_yolo_predictions(self, file_path: str, file: str) -> list[str, Figure]:
+    def _get_yolo_predictions(self, file_path: str, file: str) -> Figure:
         """
         Gets YOLOv8 predictions for an image.
 
@@ -69,13 +66,13 @@ class ImagePredictor(PrecictorBase):
         # Get predictions
         results = self.model.predict(file_path)
         # Visualize the predictions
-        label, fig = self._visualize_predictions(results, file_path, file)
-        return label, fig
+        fig = self._visualize_predictions(results, file_path, file)
+        return fig
 
     def _visualize_predictions(self,
                                results: list,
                                file_path: str,
-                               file: str) -> list[str, Figure]:
+                               file: str) -> Figure:
         """
         Visualizes YOLO predictions on an image.
 
@@ -131,12 +128,14 @@ class ImagePredictor(PrecictorBase):
                          color='black',
                          fontsize=12,
                          bbox=dict(facecolor='white', alpha=0.7))
+                self._labels.append(label)
         if self.save_output:
             output_path = os.path.join('runs', file)
             plt.savefig(output_path)
         if not plate_detected:
             label = 'No Plate Detected'
-        return label, fig
+            self._labels.append(label)
+        return fig
 
 
 class VideoPredictor(PrecictorBase):
@@ -212,14 +211,15 @@ class VideoPredictor(PrecictorBase):
             os.remove(tmpfile.name)
             return video_bytes
 
-    def _get_yolo_predictions(self):
+    def _get_yolo_predictions(self) -> None:
         """Perform YOLOv8 inference on current frame."""
         results = self.model(self.frame)
         for result in results:
             for box in result.boxes:
-                self._visualize_predictions(box)
+                label = self._visualize_predictions(box)
+                self._labels.append(label)
 
-    def _visualize_predictions(self, box):
+    def _visualize_predictions(self, box) -> str:
         """Draw bounding boxes and OCR results."""
         x_min, y_min, x_max, y_max = map(int, box.xyxy[0])
         label = self.model.names[int(box.cls)]
@@ -230,8 +230,8 @@ class VideoPredictor(PrecictorBase):
         cv2.putText(self.frame, f"{label} {conf:.2f}", (x_min, y_min - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, 2)
 
-        if self.reader:
-            ocr_result = self._read_plate(self.frame, x_min, y_min, x_max, y_max)
-            ocr_label = ocr_result[0][1] if ocr_result else "Unable to read"
-            cv2.putText(self.frame, ocr_label, (x_min, y_max + 25),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+        ocr_result = self._read_plate(self.frame, x_min, y_min, x_max, y_max)
+        label = ocr_result[0][1] if ocr_result else "Unable to read"
+        cv2.putText(self.frame, label, (x_min, y_max + 25),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+        return label

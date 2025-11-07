@@ -41,7 +41,8 @@ def process_image(input_file):
                                output_name=None,
                                save_output=False)
     output_file = predictor.run()
-    return output_file
+    labels = predictor._labels
+    return labels, output_file
 
 
 def process_video(input_file):
@@ -54,11 +55,12 @@ def process_video(input_file):
                                save_output=False)
     output_file = predictor.run()
     output_path = save_temp(input_name, output_file)
-    return output_path
+    labels = predictor._labels
+    return labels, output_path
 
 
 with gr.Blocks() as demo:
-    gr.Markdown("## 🚗 Car Plate Recognition (Image or Video)")
+    gr.Markdown("# 🚗 Car Plate Recognition (Image or Video)")
 
     with gr.Row():
         input_type = gr.Radio(
@@ -71,6 +73,7 @@ with gr.Blocks() as demo:
     file_input = gr.File(label="Upload Image or Video")
 
     # Two possible output components
+    labels_output = gr.Text(label="Predicted Labels", visible=True)
     image_output = gr.Plot(label="Predicted Image", visible=True)
     video_output = gr.Video(label="Predicted Video", visible=False)
 
@@ -88,19 +91,23 @@ with gr.Blocks() as demo:
 
     def handle_run(selected_type, file_obj):
         if selected_type == "Image":
-            return process_image(file_obj), None
+            labels, output = process_image(file_obj)
+            # labels_output.value = labels
+            # image_output.value = output
+            return labels, output, None
         else:
-            return None, process_video(file_obj)
+            labels, output = process_video(file_obj)
+            return labels, None, output
 
     run_btn.click(
         fn=handle_run,
         inputs=[input_type, file_input],
-        outputs=[image_output, video_output]
+        outputs=[labels_output, image_output, video_output]
     )
     clear_btn.click(
-        fn=lambda: (None, None, None),
+        fn=lambda: (None, None, None, None),
         inputs=None,
-        outputs=[file_input, image_output, video_output],
+        outputs=[file_input, labels_output, image_output, video_output],
     )
 
 demo.launch()

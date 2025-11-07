@@ -29,6 +29,7 @@ class PrecictorBase(ABC):
         output_name: name of plt saved figure of final prediction
         reader: easyocr.Reader which would be passed if the user wants to
                 read the plate number
+        save_output: bool flag to save the output or not
 
     Private Methods
     ---------------
@@ -54,11 +55,14 @@ class PrecictorBase(ABC):
                  input: str,
                  model_path: str,
                  output_name: str,
-                 reader: easyocr.Reader = None) -> None:
+                 reader: easyocr.Reader = None,
+                 save_output: bool = True) -> None:
         self.input = input
         self.model = YOLO(model_path)
         self.output_name = output_name
         self.reader = reader
+        self.save_output = save_output
+        self._labels = []
         self._check_input()
 
     def _check_input(self) -> None:
@@ -67,7 +71,7 @@ class PrecictorBase(ABC):
             raise FileNotFoundError('No such file or directory')
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self):
         """Reads input files and Write the prediction results on them"""
 
     @abstractmethod
