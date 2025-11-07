@@ -188,7 +188,7 @@ class VideoPredictor(PrecictorBase):
             out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
         else:
             # Use a temporary file for in-memory result
-            tmpfile = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False)
+            tmpfile = tempfile.NamedTemporaryFile(suffix=".webm", delete=False)
             out = cv2.VideoWriter(tmpfile.name,
                                   cv2.VideoWriter_fourcc(*'VP90'),
                                   fps, (frame_width, frame_height))

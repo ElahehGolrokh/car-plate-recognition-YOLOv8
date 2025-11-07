@@ -17,6 +17,7 @@ except Exception:
 import easyocr
 
 from src.prediction import ImagePredictor, VideoPredictor
+from src.utils import get_plate_number, get_unique_plates
 
 
 # Path to your YOLOv8 weights
@@ -92,12 +93,12 @@ with gr.Blocks() as demo:
     def handle_run(selected_type, file_obj):
         if selected_type == "Image":
             labels, output = process_image(file_obj)
-            # labels_output.value = labels
-            # image_output.value = output
+            labels = [get_plate_number(label) for label in labels]
             return labels, output, None
         else:
             labels, output = process_video(file_obj)
-            return labels, None, output
+            unique_labels = get_unique_plates(labels)
+            return unique_labels, None, output
 
     run_btn.click(
         fn=handle_run,
