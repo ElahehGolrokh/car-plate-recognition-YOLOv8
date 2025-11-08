@@ -118,17 +118,13 @@ with gr.Blocks() as demo:
     with gr.Row():
         run_btn = gr.Button("Run Prediction", variant="primary")
         clear_btn = gr.Button("🧹 Clear", variant="secondary")
-    
-    with gr.Row():
-        download_btn = gr.Button("📥 Download Output", variant="secondary")
         flag_btn = gr.Button("🚩 Save Detected Plates", variant="secondary")
+ 
+    with gr.Row():
         status_box = gr.Textbox(label="Status", interactive=False)
 
     # Connect flag button
     flag_btn.click(fn=flag_plates, inputs=labels_output, outputs=status_box)
-
-    # Connect download button
-    download_btn.click(fn=download_output_file, inputs=hidden_path, outputs=gr.File())
 
     def handle_run(selected_type, file_obj):
         if selected_type == "Image":
@@ -146,9 +142,9 @@ with gr.Blocks() as demo:
         outputs=[labels_output, image_output, video_output]
     )
     clear_btn.click(
-        fn=lambda: (None, None, None, None),
+        fn=lambda: (None, None, None, None, None),
         inputs=None,
-        outputs=[file_input, labels_output, image_output, video_output],
+        outputs=[file_input, labels_output, image_output, video_output, status_box],
     )
 
 demo.launch()
