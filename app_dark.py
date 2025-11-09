@@ -354,6 +354,15 @@ with gr.Blocks(
             background-image: var(--radio-circle) !important;
             background-color: var(--checkbox-background-color-selected) !important;
         }
+
+        div.svelte-1rvzbk6 table tr {
+            background-color: var(--border-color-primary) !important;
+        }
+
+        /* additional classes */
+        #output-row.unequal-height {
+            align-items: stretch !important;
+        }
     """
 ) as demo:
     gr.HTML("<div class='header'><h1>🚗 Car Plate Recognition Dashboard</h1><p>Process and read vehicle plates from images or videos</p></div>")
@@ -368,11 +377,11 @@ with gr.Blocks(
 
     file_input = gr.File(label="Upload Image or Video")
 
-    # Two possible output components
-    labels_output = gr.Text(label="Predicted Labels", visible=True)
-    image_output = gr.Plot(label="Predicted Image", visible=True)
-    video_output = gr.Video(label="Predicted Video", visible=False)
-    hidden_path = gr.Textbox(visible=False)
+    with gr.Row(elem_id="output-row"):
+        image_output = gr.Plot(label="Predicted Image", visible=True)
+        video_output = gr.Video(label="Predicted Video", visible=False)
+        labels_output = gr.Text(label="Predicted Labels", visible=True)
+        hidden_path = gr.Textbox(visible=False)
 
     def toggle_output(selected_type):
         return (
