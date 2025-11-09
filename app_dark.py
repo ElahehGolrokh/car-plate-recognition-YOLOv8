@@ -398,6 +398,14 @@ with gr.Blocks(
  
     with gr.Row():
         status_box = gr.Textbox(label="Status", interactive=False)
+    
+    # Footer with author info
+    gr.HTML("""
+        <div style="text-align:center; margin-top:2rem; font-size:0.9rem; color: var(--body-text-color-subdued);">
+            Created by <a href='https://elahehgolrokh.github.io/' target='_blank'>Elaheh Golrokh</a> | 
+            <a href='https://linkedin.com/in/elahe-golrokh-736ab222a'>Contact</a>
+        </div>
+    """)
 
     # Connect flag button
     flag_btn.click(fn=flag_plates, inputs=labels_output, outputs=status_box)
