@@ -447,11 +447,11 @@ class GradioApp:
                 interactive=False,
                 lines=6,
                 value=(
-                    "mAP50-95: 0.283\n"
-                    "mAP50:    0.685\n"
-                    "mAP75:    0.170\n"
-                    "Precision: 0.83\n"
-                    "Recall:    0.61"
+                    "Precision: 0.90\n"
+                    "Recall:    0.90"
+                    "mAP50:    0.94\n"
+                    "mAP75:    0.60\n"
+                    "mAP50-95: 0.55\n"
                 ),
                 elem_classes="eval-box")
             
