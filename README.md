@@ -1,5 +1,5 @@
 # Car Plate Recognition using YOLOv8 🚗💡
-![video_predictions](output.avi)
+![video_predictions](output.webm)
 
 Welcome to the **Car Plate Recognition** project using **YOLOv8**!  
 This repository provides a complete pipeline — from dataset preparation and model training to inference and plate text reading — for automatic car plate recognition.
