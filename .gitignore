@@ -1,6 +1,7 @@
 __pycache__/
 .python-version
 .gradio/
+backup/
 flag/
 data/
 venv/
