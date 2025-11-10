@@ -19,8 +19,8 @@ args = parser.parse_args()
 
 config = OmegaConf.load('private_settings.yaml')
 API_TOKEN = args.api_token if args.api_token else config.api_token
-FILE_NAME = args.file_name if args.file_name else "model.pt"
-MODEL_PATH = "model.pt"   # path to your trained model file
+FILE_NAME = args.file_name if args.file_name else config.file_name
+MODEL_PATH = config.file_name   # path to your trained model file
 REPO_ID = args.repo_id if args.repo_id else config.repo_id
 
 
