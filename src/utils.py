@@ -1,10 +1,14 @@
+from collections import Counter
 from difflib import SequenceMatcher
 
 
 def similar(a: str, b: str, threshold: float = 0.6) -> bool:
+    """Checks if two strings are similar based on a threshold."""
     return SequenceMatcher(None, a, b).ratio() >= threshold
 
-def group_similar_plates(plates, threshold=0.6):
+
+def group_similar_plates(plates: list[str], threshold: float = 0.6) -> list[list[str]]:
+    """Groups similar plates based on a similarity threshold."""
     groups = []
     for plate in plates:
         if plate == "Unable to read" or len(plate) < 3:
@@ -19,8 +23,9 @@ def group_similar_plates(plates, threshold=0.6):
             groups.append([plate])
     return groups
 
-def get_unique_plates(plates):
-    from collections import Counter
+
+def get_unique_plates(plates: list[str]) -> list[str]:
+    """Extracts unique plate numbers from a list of plates."""
     groups = group_similar_plates(plates)
     unique_plates = []
     for g in groups:
@@ -31,5 +36,5 @@ def get_unique_plates(plates):
 
 
 def get_plate_number(label: str) -> str:
-    # Extract the plate number from the label
+    """Extracts the plate number from the label."""
     return label.split(":")[-1].strip()

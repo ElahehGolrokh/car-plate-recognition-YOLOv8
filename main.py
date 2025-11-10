@@ -5,7 +5,6 @@ from src.pipeline import Pipeline
 
 parser = argparse.ArgumentParser(description='Gets arguments for running pipeline')
 
-# Defining the parser arguments
 parser.add_argument('-rpr',
                     '--remove_prev_runs',
                     action='store_true',  # Default value is False

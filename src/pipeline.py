@@ -45,7 +45,7 @@ class Pipeline:
         self.model_path = model_path
         self.export_format = export_format
 
-    def run(self):
+    def run(self) -> None:
         """Runs the entire pipeline based on user prefrences"""
         Config = OmegaConf.load(self.config_path)
         if self.remove_prev_runs:

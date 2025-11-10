@@ -8,11 +8,17 @@ from src.exporting import Exporter
 parser = argparse.ArgumentParser(
     prog='export.py',
     description='Export model to Hugging Face Hub',
-    epilog=f'Thanks for using.'
+    epilog='Thanks for using.'
 )
 
-parser.add_argument("-ri", "--repo_id", type=str, help="Hugging Face repo ID where model is stored")
-parser.add_argument("-fn", "--file_name", type=str, help="File name to save in repo (default = 'model.pt')")
+parser.add_argument("-ri",
+                    "--repo_id",
+                    type=str,
+                    help="Hugging Face repo ID where model is stored")
+parser.add_argument("-fn",
+                    "--file_name",
+                    type=str,
+                    help="File name to save in repo (default = 'model.pt')")
 parser.add_argument("--api_token", type=str, help="Hugging Face API token")
 
 args = parser.parse_args()

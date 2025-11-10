@@ -26,17 +26,13 @@ from src.prediction import ImagePredictor, VideoPredictor
 from src.utils import get_plate_number, get_unique_plates
 
 
-# Path to your YOLOv8 weights
-MODEL_PATH = "model.pt"
-
-
 class GradioApp:
     def __init__(self,
                  config: OmegaConf):
         self.repo_id = config.repo_id
         self.file_name = config.file_name
 
-    def build(self) -> None:
+    def build(self) -> gr.Blocks:
         """
         Builds the Gradio application.
 
@@ -50,22 +46,17 @@ class GradioApp:
         self._load_model()
         app = self._get_interface()
         return app
-    
+
     def _load_model(self) -> None:
         """
-        Download required artifacts from Hugging Face Hub.
-
-        Returns
-        -------
-        dict
-            Dictionary mapping artifact keys (e.g. "model", "scaler") to
-            local file paths where artifacts are cached.
+        Download model from Hugging Face Hub.
         """
         try:
-            self.model_path = hf_hub_download(repo_id=self.repo_id, filename=self.file_name)
+            self.model_path = hf_hub_download(repo_id=self.repo_id,
+                                              filename=self.file_name)
         except Exception as e:
             raise ValueError(f"⚠️ Could not download {self.file_name}: {e}")
-    
+
     @staticmethod
     def _save_temp(input_name: str, output_file: bytes) -> Path:
         temp_dir = tempfile.mkdtemp()
@@ -95,10 +86,10 @@ class GradioApp:
         input_name = input_file.name
         reader = easyocr.Reader(['en'])
         predictor = ImagePredictor(input=input_name,
-                                model_path=self.model_path,
-                                reader=reader,
-                                output_name=None,
-                                save_output=False)
+                                   model_path=self.model_path,
+                                   reader=reader,
+                                   output_name=None,
+                                   save_output=False)
         output_file = predictor.run()
         labels = predictor._labels
         return labels, output_file
@@ -107,15 +98,15 @@ class GradioApp:
         input_name = input_file.name
         reader = easyocr.Reader(['en'])
         predictor = VideoPredictor(input=input_name,
-                                model_path=self.model_path,
-                                reader=reader,
-                                output_name=None,
-                                save_output=False)
+                                   model_path=self.model_path,
+                                   reader=reader,
+                                   output_name=None,
+                                   save_output=False)
         output_file = predictor.run()
         output_path = self._save_temp(input_name, output_file)
         labels = predictor._labels
         return labels, output_path
-    
+
     def _get_interface(self) -> gr.Blocks:
         with gr.Blocks(
             theme=gr.themes.Default(),
@@ -190,7 +181,7 @@ class GradioApp:
                     --button-cancel-shadow-active: var(--button-secondary-shadow-active);
                     --button-transform-hover: none;
                     --button-transform-active: none;
-                    --button-transition: all 0.2s 
+                    --button-transition: all 0.2s
                 ease;
                     --button-large-padding: var(--spacing-lg) calc(2 * var(--spacing-lg));
                     --button-large-radius: var(--radius-md);
@@ -320,8 +311,8 @@ class GradioApp:
                     box-shadow: 0 0 0 6px var(--focus-ring);
                 }
 
-                button.secondary, 
-                .gr-button-secondary, 
+                button.secondary,
+                .gr-button-secondary,
                 button.gr-button.secondary {
                     background-color: var(--button-secondary-background-fill) !important;
                     color: white !important;
@@ -439,7 +430,7 @@ class GradioApp:
                 run_btn = gr.Button("Run Prediction", variant="primary")
                 clear_btn = gr.Button("🧹 Clear", variant="secondary")
                 flag_btn = gr.Button("🚩 Save Detected Plates", variant="secondary")
-        
+
             with gr.Row():
                 status_box = gr.Textbox(label="Status", interactive=False)
             eval_box = gr.Textbox(
@@ -454,11 +445,11 @@ class GradioApp:
                     "mAP50-95: 0.55\n"
                 ),
                 elem_classes="eval-box")
-            
+
             # Footer with author info
             gr.HTML("""
                 <div style="text-align:center; margin-top:2rem; font-size:0.9rem; color: var(--body-text-color-subdued);">
-                    Created by <a href='https://elahehgolrokh.github.io/' target='_blank'>Elaheh Golrokh</a> | 
+                    Created by <a href='https://elahehgolrokh.github.io/' target='_blank'>Elaheh Golrokh</a> |
                     <a href='https://linkedin.com/in/elahe-golrokh-736ab222a'>Contact</a>
                 </div>
             """)
@@ -486,6 +477,10 @@ class GradioApp:
             clear_btn.click(
                 fn=lambda: (None, None, None, None, None),
                 inputs=None,
-                outputs=[file_input, labels_output, image_output, video_output, status_box],
+                outputs=[file_input,
+                         labels_output,
+                         image_output,
+                         video_output,
+                         status_box],
             )
             return demo

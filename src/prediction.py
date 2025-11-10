@@ -1,11 +1,13 @@
 import cv2
 import easyocr
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 import os
-
 import tempfile
+
+from pathlib import Path
+from typing import Union
 from ultralytics import YOLO
 
 from .base import PrecictorBase
@@ -13,27 +15,44 @@ from .base import PrecictorBase
 
 class ImagePredictor(PrecictorBase):
     """
-    Gets predictions and visualization of a yolo saved model on test images
-    ...
+    Performs YOLOv8 inference on one or multiple test images and visualizes
+    the detected license plates with OCR-based text extraction.
+
+    This class extends `PrecictorBase` to handle still image inputs. It supports
+    both single-image and directory-based batch predictions. The output can be
+    displayed using matplotlib or saved to disk, depending on configuration.
+
     Attributes
     ----------
-        input: path to input test image or directory
-        model_path: path to saved YOLOv8 model
-        output_name: name of plt saved figure of final prediction
-        reader: easyocr.Reader which would be passed if the user wants to
-                read the plate number
+    input : str
+        Path to a test image or directory containing test images.
+    model_path : str
+        Path to the trained YOLOv8 model file.
+    output_name : str
+        Filename for the saved output plot (if `save_output=True`).
+    reader : easyocr.Reader
+        EasyOCR reader instance used for reading plate text from detected regions.
+    save_output : bool
+        Whether to save the annotated image(s) to disk or return the matplotlib figure.
 
     Private Methods
     ---------------
-        _check_input()
-        _get_yolo_predictions()
-        _visualize_predictions()
-        _crop_plate()
-        _read_plate()
+    _check_input()
+        Ensures the provided input path exists and is valid.
+    _get_yolo_predictions()
+        Runs YOLOv8 inference on the input image(s).
+    _visualize_predictions()
+        Draws bounding boxes, labels, and OCR results on detected objects.
+    _crop_plate()
+        Extracts the license plate region from an image.
+    _read_plate()
+        Applies OCR on cropped plate regions to extract alphanumeric text.
 
     Public Methods
     --------------
-        run()
+    run()
+        Executes the full inference pipeline and returns the annotated image
+        (as a matplotlib Figure) or saves it to disk.
     """
     def __init__(self,
                  input: str,
@@ -58,14 +77,12 @@ class ImagePredictor(PrecictorBase):
 
     def _get_yolo_predictions(self, file_path: str, file: str) -> Figure:
         """
-        Gets YOLOv8 predictions for an image.
+        Returns YOLOv8 prediction results for an image.
 
         :param file_path: path to test image or directory of images
         :param file: input file name. it will be used to save the output
         """
-        # Get predictions
         results = self.model.predict(file_path)
-        # Visualize the predictions
         fig = self._visualize_predictions(results, file_path, file)
         return fig
 
@@ -149,8 +166,7 @@ class VideoPredictor(PrecictorBase):
         model_path: path to saved YOLOv8 model
         output_name: name of saved output in avi format of final prediction
         frame: current video frame which is under prediction
-        reader: easyocr.Reader which would be passed if the user wants to
-                read the plate number
+        reader: easyocr.Reader
 
     Private Methods
     ---------------
@@ -171,7 +187,7 @@ class VideoPredictor(PrecictorBase):
         self.model = YOLO(model_path)
         self.frame = None
 
-    def run(self):
+    def run(self) -> Union[Path, bytes]:
         """Run YOLOv8 detection and optionally return the output video as bytes."""
         cap = cv2.VideoCapture(self.input)
         if not cap.isOpened():

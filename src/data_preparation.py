@@ -147,7 +147,7 @@ class PrepareData:
 
         return [x_min_norm, y_min_norm, x_max_norm, y_max_norm]
 
-    def _normalize_dataset(self, output_dir=None):
+    def _normalize_dataset(self, output_dir=None) -> None:
         """
         Normalize bounding box coordinates for the entire dataset.
 

@@ -3,7 +3,9 @@ import numpy as np
 import os
 
 from abc import ABC, abstractmethod
-from typing import Tuple
+from matplotlib.figure import Figure
+from pathlib import Path
+from typing import Tuple, Union
 from ultralytics import YOLO
 
 
@@ -71,19 +73,37 @@ class PrecictorBase(ABC):
             raise FileNotFoundError('No such file or directory')
 
     @abstractmethod
-    def run(self):
-        """Reads input files and Write the prediction results on them"""
+    def run(self) -> Union[Figure, Path, bytes]:
+        """
+        Run YOLOv8 prediction on the input.
+
+        Returns
+        -------
+        Figure (for images)
+            Matplotlib figure showing predictions.
+        Path (for saved videos)
+            Path to the output video file.
+        bytes (for in-memory video)
+            Raw video bytes suitable for Gradio streaming.
+        """
 
     @abstractmethod
-    def _get_yolo_predictions(self,):
+    def _get_yolo_predictions(self,) -> None:
         """
-        Returns YOLOv8 predictions for an image or video.
+        Performs YOLO inference and updates the current frame or image.
+        (No return value; modifies state in subclasses.)
         """
 
     @abstractmethod
-    def _visualize_predictions(self,):
+    def _visualize_predictions(self,) -> Union[Figure, str]:
         """
-        Visualizes YOLO predictions on an image or video.
+        Visualizes YOLO predictions on an image or video frame.
+
+        Returns
+        -------
+        Figure or str
+            Figure for image-based prediction, or recognized plate string
+            for video.
         """
 
     @staticmethod
@@ -100,5 +120,5 @@ class PrecictorBase(ABC):
         """
         plate_crop = self._crop_plate(image, bbx)
         ocr_result = self.reader.readtext(plate_crop,
-                                          allowlist='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+                                          allowlist="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_.•· ")
         return ocr_result

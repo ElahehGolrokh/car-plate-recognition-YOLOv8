@@ -13,7 +13,7 @@ class Exporter:
         self.model_path = model_path
         login(api_token)
 
-    def run(self, filename: str = "model.pt"):
+    def run(self, filename: str = "model.pt") -> str:
         """
         Uploads a trained model file to Hugging Face Hub.
 
