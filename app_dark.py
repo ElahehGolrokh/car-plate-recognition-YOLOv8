@@ -363,6 +363,16 @@ with gr.Blocks(
         #output-row.unequal-height {
             align-items: stretch !important;
         }
+
+        .eval-box textarea {
+            font-family: monospace !important;
+            background-color: var(--block-background-fill) !important;
+            color: var(--body-text-color) !important;
+            padding: 0.6em !important;
+            border-radius: 8px !important;
+            border: 1px solid var(--border-color-primary) !important;
+            resize: none;
+        }
     """
 ) as demo:
     gr.HTML("<div class='header'><h1>🚗 Car Plate Recognition Dashboard</h1><p>Process and read vehicle plates from images or videos</p></div>")
@@ -398,6 +408,18 @@ with gr.Blocks(
  
     with gr.Row():
         status_box = gr.Textbox(label="Status", interactive=False)
+    eval_box = gr.Textbox(
+    label="Evaluation Results",
+    interactive=False,
+    lines=6,
+    value=(
+        "mAP50-95: 0.283\n"
+        "mAP50:    0.685\n"
+        "mAP75:    0.170\n"
+        "Precision: 0.83\n"
+        "Recall:    0.61"
+    ),
+    elem_classes="eval-box")
     
     # Footer with author info
     gr.HTML("""
