@@ -1,21 +1,32 @@
 # Car Plate Recognition using YOLOv8 🚗💡
-![predictions](predictions.jpg)
+![video_predictions](output.avi)
 
 Welcome to the **Car Plate Recognition** project using **YOLOv8**!  
 This repository provides a complete pipeline — from dataset preparation and model training to inference and plate text reading — for automatic car plate recognition.
 
-![video_predictions](output02.avi)
+![plate_reading](plate_reading.jpg)
 
 ---
 
 ## 🚀 Overview
 
 This project extends the basic YOLOv8 object detection workflow to detect and read car plates.  
-You’ll learn how to prepare a custom dataset, train a YOLOv8 model, and use OCR (EasyOCR) to read license plates from images and videos.
+You’ll learn how to prepare a custom dataset, train a YOLOv8 model, and use **OCR (EasyOCR)** to **read license plates** from **images** and **videos**.
 
-📦 **Dataset:**  
-You can find the dataset used in this project on Kaggle:  
+📦 **Datasets**  
+
+The main dataset used in this project is available on Kaggle. It was intentionally chosen because its structure is **not pre-formatted for YOLO**, making it an excellent example for demonstrating **how to prepare data for YOLO-based object detection tasks**:  
 👉 [Car Plate Detection Dataset](https://www.kaggle.com/datasets/andrewmvd/car-plate-detection)
+So the data prepration phase is developed considering this dataset.
+
+However, to achieve **better accuracy and robustness** in the final model, the deployed version was trained on a larger and more diverse dataset:  
+👉 [Large License Plate Dataset](https://www.kaggle.com/datasets/fareselmenshawii/large-license-plate-dataset)
+
+**Dataset Split:**  
+- 🏋️ **Training samples:** 25,470  
+- 🧪 **Validation samples:** 1,073  
+- ✅ **Test samples:** 386
+
 
 💻 **Kaggle Notebook:**  
 A full tutorial notebook is also available here:  
@@ -23,18 +34,25 @@ A full tutorial notebook is also available here:
 
 ---
 
+## 🌐 Live Demo on Hugging Face Spaces
+Try the model live here!  
+👉 [Car Plate Recognition – Hugging Face Demo](https://huggingface.co/spaces/elahehgolrokh/car-plate-recognition)
+
+---
+
 ## 🧩 Development Steps
 
-1. **Train a baseline plate detection model** using YOLOv8 on the Kaggle dataset.  
-2. **Add the plate reading phase** using EasyOCR to recognize plate numbers.  
-3. **Improve the detection model** through fine-tuning on [this Kaggle dataset](https://www.kaggle.com/datasets/fareselmenshawii/large-license-plate-dataset).  
-4. **To Do:** Enhance prediction **consistency across video frames** for smoother tracking.
+1. **Train a plate detection model** using YOLOv8 on the Kaggle dataset.  
+2. **Integrate OCR capabilities** with EasyOCR to recognize and extract license plate numbers.  
+3. **Implement image and video inference:** the final model can read license plates from both images and videos.  
+4. **Deploy the Gradio app** publicly on [Hugging Face Spaces](https://huggingface.co/spaces) for interactive demo and sharing.  
+5. **To Do:** Improve prediction **consistency across video frames** for smoother and more stable tracking of moving vehicles.
 
 ---
 
 ## ⚙️ Installation
 
-Tested on **Ubuntu 20.04** with **Python 3.9.12**.
+Tested on **Ubuntu 20.04** with **Python 3.10.14**.
 
 ### 1️⃣ Create a virtual environment
 ```
@@ -112,8 +130,25 @@ You can customize the following arguments:
 
 ---
 
+## 🧪 Evaluation Results
+
+The trained YOLOv8 model was evaluated on the entire [Car Plate Detection Dataset](https://www.kaggle.com/datasets/andrewmvd/car-plate-detection), achieving strong performance across precision, recall, and mean Average Precision (mAP) metrics:
+
+| Metric | Score |
+|:----------------------|:--------:|
+| **mAP<sub>50–95</sub>** | **55.5%** |
+| **mAP<sub>50</sub>** | **94.4%** |
+| **mAP<sub>75</sub>** | **59.7%** |
+| **Precision** | **89.9%** |
+| **Recall** | **90.2%** |
+
+✅ These results indicate **robust detection accuracy** and **high confidence** across varied plate types and environments.
+
+---
+
 ## 🧠 Inference with Trained Models
 
+The project uses **EasyOCR** to **extract license plate text** from the detected bounding boxes during the inference phase.  
 To perform inference on images using a trained YOLOv8 model:
 
 ```
@@ -145,19 +180,6 @@ python inference.py --model_path 'path/to/model' --video_path 'path/to/test_vide
 
 ---
 
-## 🔍 Plate Reading (OCR)
-
-![plate_reading](plate_reading.jpg)
-
-To recognize plate numbers from detections, use the OCR option:
-
-```
-python inference.py --model_path 'path/to/model' --image_path 'path/to/test_image' -rf
-```
-
-This enables the **EasyOCR** module to extract plate text from the detected bounding boxes.
-
----
 
 ## 🧾 License
 This project is open-source and distributed under the MIT License.  
