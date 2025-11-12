@@ -196,5 +196,5 @@ Feel free to use, modify, and share it for research or personal projects.
 ---
 
 **Author:** Elaheh Golrokh  
-📧 For questions or collaboration: [GitHub Profile](https://github.com/elahehgolrokh)
+📧 For questions or collaboration: [GitHub Profile](https://github.com/elahehgolrokh) <br>
 🌐 To see portfolio & other projects [click here](https://github.com/elahehgolrokh)
