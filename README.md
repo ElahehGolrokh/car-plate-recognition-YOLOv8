@@ -1,6 +1,5 @@
 # Car Plate Recognition using YOLOv8 🚗💡
-![video_predictions](output.webm)
-<video width=640 controls><source src="output.webm">Yore browser ddoes not support the video tag.</video>
+![video_predictions](output.gif)
 
 Welcome to the **Car Plate Recognition** project using **YOLOv8**!  
 This repository provides a complete pipeline — from dataset preparation and model training to inference and plate text reading — for automatic car plate recognition.
@@ -192,8 +191,10 @@ Feel free to use, modify, and share it for research or personal projects.
 - [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics)
 - [EasyOCR](https://github.com/JaidedAI/EasyOCR)
 - [Kaggle Dataset: Car Plate Detection](https://www.kaggle.com/datasets/andrewmvd/car-plate-detection)
+- [Kaggle Dataset: Large License Plate Dataset](https://www.kaggle.com/datasets/fareselmenshawii/large-license-plate-dataset)
 
 ---
 
 **Author:** Elaheh Golrokh  
 📧 For questions or collaboration: [GitHub Profile](https://github.com/elahehgolrokh)
+🌐 To see portfolio & other projects [click here](https://github.com/elahehgolrokh)
